@@ -7,11 +7,12 @@ namespace BankAPI
     {
         static void Main(string[] args)
         {
-            var bank = new Bank();
+            var bank = new Bank("EUR");
 
-            bank.OpenAccount(new Person());
+            var acc = bank.OpenAccount(new Person());
 
-            Console.WriteLine("Hello World!");
+            Console.WriteLine(acc);
+            Console.ReadKey();
         }
     }
 }
