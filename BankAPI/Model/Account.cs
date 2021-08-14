@@ -6,6 +6,9 @@ namespace BankAPI.Model
     {
         private List<Person> persons;
         private Money money;
+        public Money Balance {
+            get { return this.money; }
+        }
         public Account(Person person, Money money) {
 
             this.persons = new List<Person>();

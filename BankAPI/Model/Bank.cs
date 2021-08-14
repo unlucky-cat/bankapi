@@ -13,7 +13,6 @@ namespace BankAPI.Model {
             this.persons = new List<Person>();
             this.accounts = new List<Account>();
         }
-
         public Account OpenAccount(Person person) {
 
             var acc = this.CreateAccount(person, new Money(0f, this.defaultCurrency));
