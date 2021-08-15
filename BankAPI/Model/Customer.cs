@@ -1,10 +1,10 @@
 using System;
 
 namespace BankAPI.Model {
-    public class Person {
+    public class Customer {
         
         private Guid uid;
-        public Person() {
+        public Customer() {
 
             this.uid = Guid.NewGuid();
         }

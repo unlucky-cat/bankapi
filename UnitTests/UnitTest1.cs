@@ -10,7 +10,7 @@ namespace UnitTests
         public void Test1()
         {
             var bank = new Bank("Eur");
-            var acc = bank.OpenAccount(new Person());
+            var acc = bank.OpenAccount(new Customer());
             
 
             Assert.Equal(0f, acc.Balance.Amount);

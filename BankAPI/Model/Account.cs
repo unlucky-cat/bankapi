@@ -4,22 +4,22 @@ namespace BankAPI.Model
 {
     public class Account
     {
-        private List<Person> persons;
+        private List<Customer> customers;
         private Money money;
         public Money Balance {
             get { return this.money; }
         }
-        public Account(Person person, Money money) {
+        public Account(Customer customer, Money money) {
 
-            this.persons = new List<Person>();
-            this.persons.Add(person);
+            this.customers = new List<Customer>();
+            this.customers.Add(customer);
 
             this.money = money;
         }
 
         public override string ToString()
         {
-            return string.Format("{0} has {1}", persons[0], money);
+            return string.Format("{0} has {1}", customers[0], money);
         }
     }
 }

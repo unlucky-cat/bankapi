@@ -5,26 +5,27 @@ namespace BankAPI.Model {
     public class Bank {
 
         private string defaultCurrency;
-        private List<Person> persons;
+        private List<Customer> customers;
         private List<Account> accounts;
+        
         public Bank(string DefaultCurrency) {
             
             this.defaultCurrency = DefaultCurrency;
-            this.persons = new List<Person>();
+            this.customers = new List<Customer>();
             this.accounts = new List<Account>();
         }
-        public Account OpenAccount(Person person) {
+        public Account OpenAccount(Customer person) {
 
             var acc = this.CreateAccount(person, new Money(0f, this.defaultCurrency));
 
-            persons.Add(person);
+            customers.Add(person);
             accounts.Add(acc);
 
             return acc;
         }
 
-        private Account CreateAccount(Person person, Money money) {
-            return new Account(person, money);
+        private Account CreateAccount(Customer customer, Money money) {
+            return new Account(customer, money);
         }
     }
 }
