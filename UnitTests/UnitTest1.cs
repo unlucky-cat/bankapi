@@ -1,5 +1,7 @@
 using System;
 using BankAPI.Model;
+using BankAPI.Interfaces;
+using BankAPI.DefaultImplementations;
 using Xunit;
 
 namespace UnitTests
@@ -9,7 +11,9 @@ namespace UnitTests
         [Fact]
         public void Test1()
         {
-            var bank = new Bank("Eur");
+            
+            var customers = new InMemoryCustomerRepository();
+            var bank = new Bank("EUR", customers);
             var acc = bank.OpenAccount(new Customer());
             
 
