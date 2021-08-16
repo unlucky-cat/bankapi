@@ -6,12 +6,22 @@ namespace BankAPI.Model {
     public class Bank {
 
         private string defaultCurrency;
+        private Money equity;
+        public Money Equity {
+            get { return equity; }
+        }
         private ICustomerRepository customers;
         private IAccountRepository accounts;
         
-        public Bank(string DefaultCurrency, ICustomerRepository customerRepository, IAccountRepository accountRepository) {
+        public Bank(
+            string defaultCurrency, 
+            float seedCapital,
+            ICustomerRepository customerRepository, 
+            IAccountRepository accountRepository
+        ) {
             
-            this.defaultCurrency = DefaultCurrency;
+            this.defaultCurrency = defaultCurrency;
+            this.equity = new Money(seedCapital, defaultCurrency);
             this.customers = customerRepository;
             this.accounts = accountRepository;
         }
