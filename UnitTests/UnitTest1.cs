@@ -13,7 +13,8 @@ namespace UnitTests
         {
             
             var customers = new InMemoryCustomerRepository();
-            var bank = new Bank("EUR", customers);
+            var accounts = new InMemoryAccountRepository();
+            var bank = new Bank("EUR", customers, accounts);
             var acc = bank.OpenAccount(new Customer());
             
 

@@ -7,13 +7,13 @@ namespace BankAPI.Model {
 
         private string defaultCurrency;
         private ICustomerRepository customers;
-        private List<Account> accounts;
+        private IAccountRepository accounts;
         
-        public Bank(string DefaultCurrency, ICustomerRepository customerRepository) {
+        public Bank(string DefaultCurrency, ICustomerRepository customerRepository, IAccountRepository accountRepository) {
             
             this.defaultCurrency = DefaultCurrency;
             this.customers = customerRepository;
-            this.accounts = new List<Account>();
+            this.accounts = accountRepository;
         }
         public Account OpenAccount(Customer customer) {
 
