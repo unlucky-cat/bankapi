@@ -5,19 +5,19 @@ namespace BankAPI.Model
     public class Account
     {
         private Customer customer;
-        private Money money;
-        public Money Balance {
-            get { return this.money; }
-        }
-        public Account(Customer customer, Money money) {
+        public ushort AccountType { get; set; }
+        public Account(Customer customer, ushort accountType) {
 
             this.customer = customer;
-            this.money = money;
+            this.AccountType = accountType;
         }
 
         public override string ToString()
         {
-            return string.Format("{0} has {1}", customer, money);
+            //return $"{customer} has {money}";
+            //return string.Format("{0} has {1}", customer, money);
+
+            return base.ToString();
         }
     }
 }

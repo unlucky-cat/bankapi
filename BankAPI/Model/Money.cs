@@ -1,7 +1,13 @@
+using System;
+
 namespace BankAPI.Model
 {
     public class Money {
         public Money(float Amount, string Currency) {
+
+            if (string.IsNullOrWhiteSpace(Currency)) 
+                throw new ArgumentException("Currency can't be empty string", nameof(Currency));
+                
             this.Amount = Amount;
             this.Currency = Currency;
         }
@@ -10,7 +16,7 @@ namespace BankAPI.Model
 
         public override string ToString()
         {
-            return string.Format("{0} {1}", Amount, Currency);
+            return $"{Amount} {Currency}";
         }
     }
 }

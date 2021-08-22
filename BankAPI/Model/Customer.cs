@@ -4,14 +4,18 @@ namespace BankAPI.Model {
     public class Customer {
         
         private Guid uid;
-        public Customer() {
 
+        public string Name { get; set; }
+        public Customer(string name) {
+
+            this.Name = name;
             this.uid = Guid.NewGuid();
+
         }
 
         public override string ToString()
         {
-            return uid.ToString();
+            return $"{Name} : {uid}";
         }
     }
 }
