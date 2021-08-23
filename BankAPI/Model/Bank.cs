@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using BankAPI.Interfaces;
 using System;
+using System.Linq;
 
 namespace BankAPI.Model {
 
@@ -20,7 +21,7 @@ namespace BankAPI.Model {
         
         public Bank(
             string defaultCurrency, 
-            float seedCapital,
+            decimal seedCapital,
             ICustomerRepository customerRepository, 
             IAccountRepository accountRepository,
             ITransactionsJournalRepository journalRepository
@@ -82,7 +83,20 @@ namespace BankAPI.Model {
 
         public Money GetAccountBalance(Account account) {
 
-            throw new NotImplementedException("GetAccountBalance");
+            decimal? credit = this.journal.GetTransactions()
+                .Where(t => 
+                    t.CreditAccount.Equals(account) && 
+                    t.Amount.Currency == this.defaultCurrency)
+                .Sum(t => t.Amount.Amount);
+
+            decimal? debit = this.journal.GetTransactions()
+                .Where(t => 
+                    t.DebitAccount.Equals(account) && 
+                    t.Amount.Currency == this.defaultCurrency)
+                .Sum(t => t.Amount.Amount);
+            
+            return new Money(debit.GetValueOrDefault(0) - credit.GetValueOrDefault(0), this.defaultCurrency);
+            // throw new NotImplementedException("GetAccountBalance");
         }
     }
 }

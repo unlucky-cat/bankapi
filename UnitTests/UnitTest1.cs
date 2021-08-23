@@ -16,14 +16,15 @@ namespace UnitTests
             var accounts = new InMemoryAccountRepository();
             var journal = new InMemoryJournalRepository();
 
-            var bank = new Bank("EUR", 1000000f, customers, accounts, journal);
+            var bank = new Bank("EUR", 1000000m, customers, accounts, journal);
 
             // Act
             var acc = bank.OpenNonCashAccount(new Customer("Andrey"));
+            var balance = bank.GetAccountBalance(acc).Amount;
             
             // Assert
-            //Assert.True(0f == acc.Balance.Amount, "Initial balance for a new account equals to zero");
-            Assert.True(1000000f == bank.Equity.Amount, "Bank equity is equal to seed capital for a newly created bank");
+            Assert.True(1000000m == bank.Equity.Amount, "Bank equity is equal to seed capital for a newly created bank");
+            Assert.True(0m == balance, "Initial balance of a new account equals to zero");
         }
     }
 }

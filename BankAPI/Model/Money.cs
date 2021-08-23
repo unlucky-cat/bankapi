@@ -3,7 +3,7 @@ using System;
 namespace BankAPI.Model
 {
     public class Money {
-        public Money(float Amount, string Currency) {
+        public Money(decimal Amount, string Currency) {
 
             if (string.IsNullOrWhiteSpace(Currency)) 
                 throw new ArgumentException("Currency can't be empty string", nameof(Currency));
@@ -11,7 +11,7 @@ namespace BankAPI.Model
             this.Amount = Amount;
             this.Currency = Currency;
         }
-        public float Amount {get; set;}
+        public decimal Amount {get; set;}
         public string Currency {get; set;}
 
         public override string ToString()
