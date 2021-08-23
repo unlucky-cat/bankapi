@@ -16,14 +16,14 @@ namespace BankAPI.Model {
         }
         private ICustomerRepository customers;
         private IAccountRepository accounts;
-
-        private List<GeneralLedgerRecord> journal = new List<GeneralLedgerRecord>();
+        private ITransactionsJournalRepository journal;
         
         public Bank(
             string defaultCurrency, 
             float seedCapital,
             ICustomerRepository customerRepository, 
-            IAccountRepository accountRepository
+            IAccountRepository accountRepository,
+            ITransactionsJournalRepository journalRepository
         ) {
             
             var initialCapital = new Money(seedCapital, defaultCurrency);
@@ -31,6 +31,7 @@ namespace BankAPI.Model {
             this.equity = initialCapital;
             this.customers = customerRepository;
             this.accounts = accountRepository;
+            this.journal = journalRepository;
 
             var owner = new Customer("The Owner");
             this.customers.Add(owner);
@@ -38,45 +39,50 @@ namespace BankAPI.Model {
             var bank = new Customer("The Bank");
             this.customers.Add(bank);
 
-            var ownerAccount = new Account(owner, (ushort) GeneralLedgerDefinition.Equity.OwnerEquity);
+            var ownerAccount = new Account(owner, (ushort) AccountTypes.Equity.OwnerEquity);
             this.accounts.Add(ownerAccount);
 
-            var bankCashAccount = new Account(bank, (ushort) GeneralLedgerDefinition.Asset.Cash);
+            var bankCashAccount = new Account(bank, (ushort) AccountTypes.Asset.Cash);
             this.accounts.Add(bankCashAccount);
 
-            var clientMoneyAccount = new Account(bank, (ushort) GeneralLedgerDefinition.Asset.Cash);
+            var clientMoneyAccount = new Account(bank, (ushort) AccountTypes.Liability.ClientMoney);
             this.accounts.Add(clientMoneyAccount);
             this.ClientMoneyAccount = clientMoneyAccount;
 
-            this.journal.Add(new GeneralLedgerRecord {
+            this.journal.Add(new FinancialTransaction {
                 DebitAccount = bankCashAccount,
                 CreditAccount = ownerAccount,
                 Amount = initialCapital,
                 OnDate = DateTime.Now,
             });
         }
-        public Account OpenAccount(Customer customer) {
+        public Account OpenNonCashAccount(Customer customer) {
 
             customers.Add(customer);
-            var acc = new Account(customer, (ushort) GeneralLedgerDefinition.Asset.NonCash);
+            var customerNonCashAccount = new Account(customer, (ushort) AccountTypes.Asset.NonCash);
 
-            accounts.Add(acc);
+            accounts.Add(customerNonCashAccount);
 
-            return acc;
+            return customerNonCashAccount;
         }
 
-        public Account OpenAccount(Customer customer, Money initialAmount) {
+        public Account OpenNonCashAccount(Customer customer, Money initialAmount) {
             
-            var customerAccount = this.OpenAccount(customer);
+            var customerNonCashAccount = this.OpenNonCashAccount(customer);
 
-            this.journal.Add(new GeneralLedgerRecord {
-                DebitAccount = customerAccount,
+            this.journal.Add(new FinancialTransaction {
+                DebitAccount = customerNonCashAccount,
                 CreditAccount = this.ClientMoneyAccount,
                 Amount = initialAmount,
                 OnDate = DateTime.Now,
             });
 
-            return customerAccount;
+            return customerNonCashAccount;
+        }
+
+        public Money GetAccountBalance(Account account) {
+
+            throw new NotImplementedException("GetAccountBalance");
         }
     }
 }

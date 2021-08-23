@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace BankAPI.Model
 {
-    public static class GeneralLedgerDefinition {
+    public static class AccountTypes {
     
         public enum Category : ushort
         {

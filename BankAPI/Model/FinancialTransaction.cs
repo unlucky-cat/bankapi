@@ -2,7 +2,7 @@ using System;
 
 namespace BankAPI.Model
 {
-    public class GeneralLedgerRecord {
+    public class FinancialTransaction {
 
             public Account DebitAccount { get; set; }
             public Account CreditAccount { get; set; }
