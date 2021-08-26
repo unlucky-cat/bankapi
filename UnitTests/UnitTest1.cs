@@ -12,9 +12,9 @@ namespace UnitTests
         public void Test1()
         {
             //Arrange
-            var customers = new InMemoryCustomerRepository();
-            var accounts = new InMemoryAccountRepository();
-            var journal = new InMemoryJournalRepository();
+            var customers = new GenericInMemoryRepository<Customer>();
+            var accounts = new GenericInMemoryRepository<Account>();
+            var journal = new GenericInMemoryRepository<FinancialTransaction>();
 
             var bank = new Bank("EUR", 1000000m, customers, accounts, journal);
 

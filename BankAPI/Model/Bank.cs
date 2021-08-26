@@ -15,16 +15,16 @@ namespace BankAPI.Model {
         public Money Equity {
             get { return equity; }
         }
-        private ICustomerRepository customers;
-        private IAccountRepository accounts;
-        private ITransactionsJournalRepository journal;
+        private IGenericRepository<Customer> customers;
+        private IGenericRepository<Account> accounts;
+        private IGenericRepository<FinancialTransaction> journal;
         
         public Bank(
             string defaultCurrency, 
             decimal seedCapital,
-            ICustomerRepository customerRepository, 
-            IAccountRepository accountRepository,
-            ITransactionsJournalRepository journalRepository
+            IGenericRepository<Customer> customerRepository, 
+            IGenericRepository<Account> accountRepository,
+            IGenericRepository<FinancialTransaction> journalRepository
         ) {
             
             var initialCapital = new Money(seedCapital, defaultCurrency);
@@ -83,13 +83,13 @@ namespace BankAPI.Model {
 
         public Money GetAccountBalance(Account account) {
 
-            decimal? credit = this.journal.GetTransactions()
+            decimal? credit = this.journal.GetRecords()
                 .Where(t => 
                     t.CreditAccount.Equals(account) && 
                     t.Amount.Currency == this.defaultCurrency)
                 .Sum(t => t.Amount.Amount);
 
-            decimal? debit = this.journal.GetTransactions()
+            decimal? debit = this.journal.GetRecords()
                 .Where(t => 
                     t.DebitAccount.Equals(account) && 
                     t.Amount.Currency == this.defaultCurrency)
