@@ -8,7 +8,7 @@ namespace BankAPI.Model {
     public class Bank {
 
         private string defaultCurrency;
-        private readonly Account ClientMoneyAccount;
+        private readonly Account NonCashAssetAccount;
         private Money equity;
 
         /// <summary> Investment of assets in a business by the owner or owners is called <c>capital</c>. </summary>
@@ -46,9 +46,9 @@ namespace BankAPI.Model {
             var bankCashAccount = new Account(bank, (ushort) AccountTypes.Asset.Cash);
             this.accounts.Add(bankCashAccount);
 
-            var clientMoneyAccount = new Account(bank, (ushort) AccountTypes.Liability.ClientMoney);
-            this.accounts.Add(clientMoneyAccount);
-            this.ClientMoneyAccount = clientMoneyAccount;
+            var nonCashAssetAccount = new Account(bank, (ushort) AccountTypes.Asset.NonCash);
+            this.accounts.Add(nonCashAssetAccount);
+            this.NonCashAssetAccount = nonCashAssetAccount;
 
             this.journal.Add(new FinancialTransaction {
                 DebitAccount = bankCashAccount,
@@ -57,28 +57,28 @@ namespace BankAPI.Model {
                 OnDate = DateTime.Now,
             });
         }
-        public Account OpenNonCashAccount(Customer customer) {
+        public Account OpenClientMoneyAccount(Customer customer) {
 
             customers.Add(customer);
-            var customerNonCashAccount = new Account(customer, (ushort) AccountTypes.Asset.NonCash);
+            var customerClientMoneyAccount = new Account(customer, (ushort) AccountTypes.Liability.ClientMoney);
 
-            accounts.Add(customerNonCashAccount);
+            accounts.Add(customerClientMoneyAccount);
 
-            return customerNonCashAccount;
+            return customerClientMoneyAccount;
         }
 
-        public Account OpenNonCashAccount(Customer customer, Money initialAmount) {
+        public Account OpenClientMoneyAccount(Customer customer, Money initialAmount) {
             
-            var customerNonCashAccount = this.OpenNonCashAccount(customer);
+            var customerClientMonryAccount = this.OpenClientMoneyAccount(customer);
 
             this.journal.Add(new FinancialTransaction {
-                DebitAccount = customerNonCashAccount,
-                CreditAccount = this.ClientMoneyAccount,
+                DebitAccount = this.NonCashAssetAccount,
+                CreditAccount = customerClientMonryAccount,
                 Amount = initialAmount,
                 OnDate = DateTime.Now,
             });
 
-            return customerNonCashAccount;
+            return customerClientMonryAccount;
         }
 
         public Money GetAccountBalance(Account account) {
@@ -97,6 +97,21 @@ namespace BankAPI.Model {
             
             return new Money(debit.GetValueOrDefault(0) - credit.GetValueOrDefault(0), this.defaultCurrency);
             // throw new NotImplementedException("GetAccountBalance");
+        }
+
+        public Account DepositNonCash(Account account, Money amount) {
+
+            if (account.AccountType != (ushort) AccountTypes.Liability.ClientMoney)
+                throw new ArgumentException("Account type should be Liability.ClientMoney"); 
+
+            this.journal.Add(new FinancialTransaction {
+                DebitAccount = this.NonCashAssetAccount,
+                CreditAccount = account,
+                Amount = amount,
+                OnDate = DateTime.Now,
+            });
+
+            return account;
         }
     }
 }
