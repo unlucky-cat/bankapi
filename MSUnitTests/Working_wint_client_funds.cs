@@ -1,15 +1,14 @@
-using System;
+﻿using BankAPI.DefaultImplementations;
 using BankAPI.Model;
-using BankAPI.Interfaces;
-using BankAPI.DefaultImplementations;
-using Xunit;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace UnitTests
+namespace MSUnitTests
 {
-    public class UnitTest1
+    [TestClass]
+    public class Working_wint_client_funds
     {
-        [Fact]
-        public void Test1()
+        [TestMethod]
+        public void Jack_is_opening_an_account()
         {
             //Arrange
             var customers = new GenericInMemoryRepository<Customer>();
@@ -21,16 +20,16 @@ namespace UnitTests
             // Act
             var acc = bank.OpenClientMoneyAccount(new Customer("Andrey"));
             var balance = bank.GetAccountBalance(acc).Amount;
-            
+
             // Assert
-            Assert.True(1000000m == bank.Equity.Amount, "Bank equity is equal to seed capital for a newly created bank");
-            Assert.True(0m == balance, "Initial balance of a new account equals to zero");
+            Assert.IsTrue(1000000m == bank.Equity.Amount, "Bank equity is equal to seed capital for a newly created bank");
+            Assert.IsTrue(0m == balance, "Initial balance of a new account equals to zero");
 
 
             bank.DepositNonCash(acc, new Money(1000m, "EUR"));
             var balanceAfterDeposit = bank.GetAccountBalance(acc).Amount;
-            
-            Assert.True(-1000m == balanceAfterDeposit, "After depositing 1000 there should be 1000 in the account");
+
+            Assert.IsTrue(-1000m == balanceAfterDeposit, "After depositing 1000 there should be 1000 in the account");
 
             // var otherAcc = bank.OpenClientMoneyAccount(new Customer("Mary"));
             // bank.TransferMoney(acc, otherAcc, 400);
