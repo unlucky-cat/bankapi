@@ -8,14 +8,34 @@ namespace BankAPI.Model {
 
     public class Bank {
 
+        // static methods
+        public static Bank CreateInMemoryBank(string defaultCurrency, decimal seedCapital)
+        {
+            var customers = new GenericInMemoryRepository<Customer>();
+            var accounts = new GenericInMemoryRepository<Account>();
+            var journal = new GenericInMemoryRepository<FinancialTransaction>();
+
+            var bank = new Bank(defaultCurrency, seedCapital, customers, accounts, journal);
+
+            return bank;
+        }
+
         private string defaultCurrency;
         private readonly Account NonCashAssetAccount;
+        private readonly Account Payables;
+        private readonly Account Receivables;
         private Money equity;
 
         /// <summary> Investment of assets in a business by the owner or owners is called <c>capital</c>. </summary>
         public Money Equity {
             get { return equity; }
         }
+
+        public string DefaultCurrency
+        {
+            get { return defaultCurrency; }
+        }
+
         private IGenericRepository<Customer> customers;
         private IGenericRepository<Account> accounts;
         private IGenericRepository<FinancialTransaction> journal;
@@ -41,15 +61,23 @@ namespace BankAPI.Model {
             var bank = new Customer("The Bank");
             this.customers.Add(bank);
 
-            var ownerAccount = new Account(owner, (ushort) AccountTypes.Equity.OwnerEquity);
+            var ownerAccount = new Account(this, owner, (ushort) AccountTypes.Equity.OwnerEquity);
             this.accounts.Add(ownerAccount);
 
-            var bankCashAccount = new Account(bank, (ushort) AccountTypes.Asset.Cash);
+            var bankCashAccount = new Account(this, bank, (ushort) AccountTypes.Asset.Cash);
             this.accounts.Add(bankCashAccount);
 
-            var nonCashAssetAccount = new Account(bank, (ushort) AccountTypes.Asset.NonCash);
+            var nonCashAssetAccount = new Account(this, bank, (ushort) AccountTypes.Asset.NonCash);
             this.accounts.Add(nonCashAssetAccount);
             this.NonCashAssetAccount = nonCashAssetAccount;
+
+            var payables = new Account(this, bank, (ushort) AccountTypes.Liability.AccountsPayable);
+            this.accounts.Add(payables);
+            this.Payables = payables;
+
+            var receivables = new Account(this, bank, (ushort)AccountTypes.Asset.AccountsReceivable);
+            this.accounts.Add(receivables);
+            this.Receivables = receivables;
 
             this.journal.Add(new FinancialTransaction {
                 DebitAccount = bankCashAccount,
@@ -58,19 +86,19 @@ namespace BankAPI.Model {
                 OnDate = DateTime.Now,
             });
         }
-        public Account OpenClientMoneyAccount(Customer customer) {
+        public Account OpenClientAccount(Customer customer) {
 
             customers.Add(customer);
-            var customerClientMoneyAccount = new Account(customer, (ushort) AccountTypes.Liability.ClientMoney);
+            var customerClientMoneyAccount = new Account(this, customer, (ushort) AccountTypes.Liability.ClientFunds);
 
             accounts.Add(customerClientMoneyAccount);
 
             return customerClientMoneyAccount;
         }
 
-        public Account OpenClientMoneyAccount(Customer customer, Money initialAmount) {
+        public Account OpenClientAccount(Customer customer, Money initialAmount) {
             
-            var customerClientMonryAccount = this.OpenClientMoneyAccount(customer);
+            var customerClientMonryAccount = this.OpenClientAccount(customer);
 
             this.journal.Add(new FinancialTransaction {
                 DebitAccount = this.NonCashAssetAccount,
@@ -80,6 +108,11 @@ namespace BankAPI.Model {
             });
 
             return customerClientMonryAccount;
+        }
+
+        public Account OpenClientAccount(Customer customer, decimal initialAmount)
+        {
+            return this.OpenClientAccount(customer, new Money(initialAmount, this.defaultCurrency));
         }
 
         public Money GetAccountBalance(Account account) {
@@ -96,14 +129,28 @@ namespace BankAPI.Model {
                     t.Amount.Currency == this.defaultCurrency)
                 .Sum(t => t.Amount.Amount);
             
-            return new Money(debit.GetValueOrDefault(0) - credit.GetValueOrDefault(0), this.defaultCurrency);
+            return new Money(Math.Abs(debit.GetValueOrDefault(0) - credit.GetValueOrDefault(0)), this.defaultCurrency);
             // throw new NotImplementedException("GetAccountBalance");
         }
 
-        public Account DepositNonCash(Account account, Money amount) {
+        public Money GetAccountTypeBalance<T>() where T : Enum
+        {
+            decimal? credit = this.journal.GetRecords()
+                .Where(t => Enum.IsDefined(typeof(T), Enum.ToObject(typeof(T), t.CreditAccount.AccountType)))
+                .Sum(t => t.Amount.Amount);
 
-            if (account.AccountType != (ushort) AccountTypes.Liability.ClientMoney)
-                throw new ArgumentException("Account type should be Liability.ClientMoney"); 
+            decimal? debit = this.journal.GetRecords()
+                  .Where(t => Enum.IsDefined(typeof(T), Enum.ToObject(typeof(T), t.DebitAccount.AccountType)))
+                  .Sum(t => t.Amount.Amount);
+
+            return new Money(Math.Abs(debit.GetValueOrDefault(0) - credit.GetValueOrDefault(0)), this.defaultCurrency);
+            // throw new NotImplementedException("GetAssetsBalance");
+        }
+
+        public void DepositNonCash(Account account, Money amount) {
+
+            if (account.AccountType != (ushort) AccountTypes.Liability.ClientFunds)
+                throw new ArgumentException("Account type should be Liability.ClientFunds"); 
 
             this.journal.Add(new FinancialTransaction {
                 DebitAccount = this.NonCashAssetAccount,
@@ -111,8 +158,34 @@ namespace BankAPI.Model {
                 Amount = amount,
                 OnDate = DateTime.Now,
             });
+        }
 
-            return account;
+        public void SendMoneyOutside(Account sender, Money amount)
+        {
+            if (sender.AccountType != (ushort)AccountTypes.Liability.ClientFunds)
+                throw new ArgumentException("Sender's account type should be Liability.ClientFunds");
+
+            this.journal.Add(new FinancialTransaction
+            {
+                DebitAccount = sender,
+                CreditAccount = this.Payables,
+                Amount = amount,
+                OnDate = DateTime.Now,
+            });
+        }
+
+        public void ReceiveMoneyFromOutside(Account receiver, Money amount)
+        {
+            if (receiver.AccountType != (ushort)AccountTypes.Liability.ClientFunds)
+                throw new ArgumentException("Sender's account type should be Liability.ClientFunds");
+
+            this.journal.Add(new FinancialTransaction
+            {
+                DebitAccount = this.Receivables,
+                CreditAccount = receiver,
+                Amount = amount,
+                OnDate = DateTime.Now,
+            });
         }
     }
 }

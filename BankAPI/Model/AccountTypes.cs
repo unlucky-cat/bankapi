@@ -17,7 +17,8 @@ namespace BankAPI.Model
 
         public enum Liability : ushort
         {
-            ClientMoney = 305,
+            ClientFunds = 305,
+            AccountsPayable = 310,
         }
 
         public enum Equity : ushort 
